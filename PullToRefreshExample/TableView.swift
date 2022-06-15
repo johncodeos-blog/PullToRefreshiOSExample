@@ -9,8 +9,7 @@
 import UIKit
 
 class TableView: UIViewController {
-    
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var tableView: UITableView!
     
     var refControl = UIRefreshControl()
     
@@ -18,6 +17,15 @@ class TableView: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Fix navigation bar color in iOS 15 and above
+        if #available(iOS 15, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+            appearance.backgroundColor = UIColor(named: "primaryColor")
+            navigationController?.navigationBar.standardAppearance = appearance
+            navigationController?.navigationBar.scrollEdgeAppearance = navigationController?.navigationBar.standardAppearance
+        }
         refControl.tintColor = UIColor.white
         refControl.addTarget(self, action: #selector(handleRefresh(refreshControl:)), for: UIControl.Event.valueChanged)
         tableView.addSubview(refControl)
@@ -26,20 +34,18 @@ class TableView: UIViewController {
     }
     
     func loadData() {
-        for i in 0...40 {
-            itemsArray.append("Item \(40-i)")
+        for i in 0 ... 40 {
+            itemsArray.append("Item \(40 - i)")
         }
         self.tableView.reloadData()
     }
 
     @objc func handleRefresh(refreshControl: UIRefreshControl) {
-        DispatchQueue.global().async {
-            // fake background loading task
-            sleep(2)
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(1)) { // We add a 1-second delay for the pull to refresh animation because the UI will glitch otherwise and won't look nice.
             DispatchQueue.main.async {
                 let start = self.itemsArray.count
                 let end = self.itemsArray.count + 20
-                for i in start..<end {
+                for i in start ..< end {
                     self.itemsArray.insert("Item \(i)", at: 0)
                 }
                 self.tableView.reloadData()
@@ -63,7 +69,4 @@ extension TableView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 44
     }
-    
-    
 }
-
