@@ -41,13 +41,15 @@ class TableView: UIViewController {
     }
 
     @objc func handleRefresh(refreshControl: UIRefreshControl) {
-        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(1)) { // We add a 1-second delay for the pull to refresh animation because the UI will glitch otherwise and won't look nice.
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(1)) { // We add a 1-second delay for the pull to refresh animation because the UI will glitch otherwise and won't look nice
+            
+            // Refresh the data here
+            let start = self.itemsArray.count
+            let end = self.itemsArray.count + 20
+            for i in start ..< end {
+                self.itemsArray.insert("Item \(i)", at: 0)
+            }
             DispatchQueue.main.async {
-                let start = self.itemsArray.count
-                let end = self.itemsArray.count + 20
-                for i in start ..< end {
-                    self.itemsArray.insert("Item \(i)", at: 0)
-                }
                 self.tableView.reloadData()
                 refreshControl.endRefreshing()
             }
